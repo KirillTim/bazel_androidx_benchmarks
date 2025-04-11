@@ -5,9 +5,9 @@ android_binary(
     srcs = [
         "com/simple/SimpleBenchmark.java",
     ],
-    # proguard_specs = [
-    #     "progard_rules.pro",
-    # ],
+    proguard_specs = [
+       "progard_rules.pro",
+    ],
     manifest = "AndroidBenchmarkManifest.xml",
     deps = [
         "@maven//:junit_junit",
@@ -22,9 +22,9 @@ android_binary(
     srcs = [
         "com/simple/SimpleTest.java",
     ],
-    # proguard_specs = [
-    #     "progard_rules.pro",
-    # ],
+    proguard_specs = [
+        "progard_rules.pro",
+    ],
     manifest = "AndroidTestManifest.xml",
     deps = [
         "@maven//:junit_junit",
