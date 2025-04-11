@@ -1,0 +1,7 @@
+.idea/
+.ijwb/
+MODULE.bazel.lock
+bazel-bin
+bazel_androidx_benchmarks
+bazel-out
+bazel-testlogs

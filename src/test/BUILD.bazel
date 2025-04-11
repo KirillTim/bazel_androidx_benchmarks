@@ -1,0 +1,33 @@
+load("@rules_android//android:rules.bzl", "android_binary", "android_library")
+
+android_binary(
+    name = "benchmark_app",
+    srcs = [
+        "com/simple/SimpleBenchmark.java",
+    ],
+    # proguard_specs = [
+    #     "progard_rules.pro",
+    # ],
+    manifest = "AndroidBenchmarkManifest.xml",
+    deps = [
+        "@maven//:junit_junit",
+        "@maven//:androidx_test_runner",
+    	"@maven//:androidx_benchmark_benchmark_junit4",
+        "@maven//:androidx_benchmark_benchmark_common",
+    ],
+)
+
+android_binary(
+    name = "test_app",
+    srcs = [
+        "com/simple/SimpleTest.java",
+    ],
+    # proguard_specs = [
+    #     "progard_rules.pro",
+    # ],
+    manifest = "AndroidTestManifest.xml",
+    deps = [
+        "@maven//:junit_junit",
+        "@maven//:androidx_test_runner",
+    ],
+)
