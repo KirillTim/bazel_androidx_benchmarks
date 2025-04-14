@@ -10,6 +10,8 @@ android_binary(
     ],
     manifest = "AndroidBenchmarkManifest.xml",
     deps = [
+        # direct dependency on "@maven//:com_squareup_wire_wire_runtime" doesn't fix the problem
+        "@maven//:com_squareup_wire_wire_runtime",
         "@maven//:junit_junit",
         "@maven//:androidx_test_runner",
     	"@maven//:androidx_benchmark_benchmark_junit4",
