@@ -1,5 +1,63 @@
 # bazel_androidx_benchmarks
 
+**UPD: The problem now is the fact that bazel doesn't merge resources (`layout.xml`, `AndroidManifest` entries, etc) from the `androidx_benchmark_benchmark_common` AAR dependency to the final APK.**
+
+When running the test with
+```
+bazelisk build //src/test:benchmark_app_missing_manifest_and_res
+adb install  bazel-bin/src/test/benchmark_app_missing_manifest_and_res.apk
+adb shell am instrument -e androidx.benchmark.suppressErrors "UNLOCKED,LOW-BATTERY,EMULATOR,ACTIVITY-MISSING" -w -r com.simple/androidx.benchmark.junit4.AndroidBenchmarkRunner
+```
+
+the test output is the follows:
+
+```
+Error in Test mechanism:
+java.lang.RuntimeException: Could not launch activity
+ at androidx.test.runner.MonitoringInstrumentation.startActivitySync(MonitoringInstrumentation.java:551)
+ at androidx.benchmark.IsolationActivity$Companion.launchSingleton(IsolationActivity.kt:140)
+ at androidx.benchmark.junit4.AndroidBenchmarkRunner.waitForActivitiesToComplete(AndroidBenchmarkRunner.kt:85)
+ at androidx.test.runner.AndroidJUnitRunner$1.run(AndroidJUnitRunner.java:512)
+...
+Caused by: java.lang.RuntimeException: Unable to resolve activity for: Intent { act=android.intent.action.MAIN flg=0x30000000 cmp=com.simple/androidx.benchmark.IsolationActivity }
+ at android.app.Instrumentation.startActivitySync(Instrumentation.java:607)
+ at android.app.Instrumentation.startActivitySync(Instrumentation.java:564)
+```
+
+That shows us that we probably doens't have an `<activity>` entry in the final APKs `AndroidManifest.xml`.
+
+We can check it with
+```
+apkanalyzer manifest print bazel-bin/src/test/benchmark_app_missing_manifest_and_res.apk | grep -i activity
+```
+and the output is empty.
+
+Then we can check the manifest for the `benchmark_common.aar`:
+
+We can do the same check for the resources as well.
+
+The workaround I found is to manually download the AAR and add it as a dependency to the APK with `aar_import` rule, see `androidix_benchmark_common_aar_imported` and `benchmark_app` targets.
+
+When running the `benchmark_app` test, everything works fine and the APK content is as expected:
+
+```
+bazelisk build //src/test:benchmark_app
+apkanalyzer manifest print bazel-bin/src/test/benchmark_app.apk | grep -i activity
+```
+output:
+```
+        <activity
+            android:name="androidx.benchmark.IsolationActivity"
+```
+
+We can also run `bazelisk aquery '//src/test:benchmark_app_missing_manifest_and_res' > /tmp/build_aquery_1.txt` to compare the action grapth for both targets and to see that for some reason the content of AAR is not passed to the `Packaging Android Resources` action.
+
+
+**End of UPD**
+
+The text below describes the previous problem of missing classes, now `workarounded` as mentioned here: https://github.com/bazel-contrib/rules_jvm_external/issues/1354#issuecomment-2803991822
+
+
 This sample app shows the problem when you build an android app that depends on the `androidx.benchmark` and try to run it.
 The problem is that the final APK does not include classes from the package `com.squareup.wire` (and some others) on which the app depends.
 
