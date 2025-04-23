@@ -1,17 +1,51 @@
-load("@rules_android//android:rules.bzl", "android_binary", "android_library")
+load("@rules_android//android:rules.bzl", "aar_import", "android_binary", "android_library")
+
+# This aar_import is used instead of "@maven//:androidx_benchmark_benchmark_common".
+aar_import(
+    name = "androidix_benchmark_common_aar_imported",
+    aar = "@androidix_benchmark_common_from_http//file",
+    deps = [
+        "@maven//:androidx_test_monitor",
+        "@maven//:androidx_tracing_tracing",
+        "@maven//:androidx_tracing_tracing_perfetto_handshake",
+        "@maven//:com_squareup_moshi_moshi",
+        "@maven//:org_jetbrains_kotlin_kotlin_stdlib",
+        "@maven//:com_squareup_wire_wire_runtime_jvm",
+        "@maven//:com_squareup_okio_okio_jvm",
+        "@maven//:org_jetbrains_annotations",
+        "@maven//:androidx_annotation_annotation_jvm",
+    ],
+)
 
 android_binary(
     name = "benchmark_app",
     srcs = [
         "com/simple/SimpleBenchmark.java",
     ],
-    proguard_specs = [
-       "progard_rules.pro",
+    manifest = "AndroidBenchmarkManifest.xml",
+    # If proguard is used exception happens: 
+    # java.lang.RuntimeException: java.lang.NoSuchMethodException: androidx.test.runner.lifecycle.Stage.values []
+    # proguard_specs = [
+    #     "progard_rules.pro",
+    # ],
+    deps = [
+        "@maven//:com_squareup_wire_wire_runtime_jvm",
+        "@maven//:junit_junit",
+        "@maven//:androidx_test_runner",
+        "@maven//:androidx_test_monitor",
+        ":androidix_benchmark_common_aar_imported",
+        "@maven//:androidx_benchmark_benchmark_junit4",
+    ],
+)
+
+android_binary(
+    name = "benchmark_app_missing_manifest_and_res",
+    srcs = [
+        "com/simple/SimpleBenchmark.java",
     ],
     manifest = "AndroidBenchmarkManifest.xml",
     deps = [
-        # direct dependency on "@maven//:com_squareup_wire_wire_runtime" doesn't fix the problem
-        "@maven//:com_squareup_wire_wire_runtime",
+        "@maven//:com_squareup_wire_wire_runtime_jvm",
         "@maven//:junit_junit",
         "@maven//:androidx_test_runner",
     	"@maven//:androidx_benchmark_benchmark_junit4",
