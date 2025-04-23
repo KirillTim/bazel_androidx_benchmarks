@@ -33,6 +33,17 @@ apkanalyzer manifest print bazel-bin/src/test/benchmark_app_missing_manifest_and
 and the output is empty.
 
 Then we can check the manifest for the `benchmark_common.aar`:
+```
+unzip ~/Downloads/benchmark-common-1.3.4.aar -d /tmp/benchmark_aar
+cat /tmp/benchmark_aar/AndroidManifest.xml | grep -i activity
+```
+the output is:
+```
+        <!-- Activity used to block background content while benchmarks are running -->
+        <activity
+            android:name="androidx.benchmark.IsolationActivity"
+        </activity>
+```
 
 We can do the same check for the resources as well.
 
